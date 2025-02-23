@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="jp">
+<head>
+    </head>
+<body>
+    <div class="container py-5 text-center">
+        <h2 class="mb-4">画像判定アプリ</h2>
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <input id="img_data" type="hidden" name="img_data" />
+            <img id="preview" class="img-fluid mb-3" style="display: none;" /> <--- プレビュー画像を表示
+            <br>
+            <button type="submit" class="btn btn-primary btn-lg">判定</button>
+        </form>
+
+        {% if img_data %}
+            <div id="image-area">
+                <hr>
+                <h2>判定対象画像</h2>
+                <img src="{{ img_data }}" class="img-fluid mb-3" alt="Uploaded Image" width="224" height="224">
+            </div>
+        {% endif %}
+
+        {% if predictions %}
+            <div id="prediction">
+                <hr>
+                <h2 class="mb-4">判定結果</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>カテゴリ</th>
+                            <th>確率</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for pred in predictions %}
+                            <tr>
+                                <td>{{ pred.class }}</td>
+                                <td>{{ pred.probability|floatformat:2 }}%</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% endif %}
+
+        {% if error_message %}  <p style="color: red;">{{ error_message }}</p>
+        {% endif %}
+
+    </div>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script>
+        $(function() {
+            $('#id_image').on('change', function() {
+                var reader = new FileReader();
+                reader.onload = function () {
+                    $("#preview").attr('src', reader.result);
+                    $("#preview").show();
+                    $("#img_data").val(reader.result);
+                }
+                reader.readAsDataURL(this.files[0]);
+                $("#prediction").empty();
+                $("#image-area").show();
+            });
+        });
+    </script>
+</body>
+</html>
